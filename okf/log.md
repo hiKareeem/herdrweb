@@ -31,3 +31,7 @@ Herdr now reports unknown tables in `config.toml` (`unknown config section [web]
 **Collapsible desktop sidebar; clean pane switches.**
 
 On `/pane/*` the desktop sidebar can be hidden so the terminal gets the full width (for tablets in landscape), shown over the pane from the header, and pinned back. Switching panes used to reuse the terminal scroller: the new pane kept the previous one's horizontal offset, and iOS Safari left tiles of the old pane's text painted beside the new text. The scroller is now keyed per pane, and lines are tagged with the pane they were read from. Updated `frontend/navigation.md` and `concepts/terminal-view.md`.
+
+**Terminal fits its view at every width.**
+
+`fitToWidth` applied only below the 880px breakpoint, so an iPad in landscape showed a 152-column pane a few columns short even with the sidebar hidden. It now fits at every width and measures the text with a `Range` instead of `scrollWidth`, which stayed at the box width once fitted and so kept the font shrunk after the view widened. Updated `concepts/terminal-view.md`.

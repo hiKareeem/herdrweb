@@ -33,7 +33,7 @@ browser (SvelteKit)  ⇄  Go bridge (herdrweb)  ⇄  Herdr socket
 ## Features
 
 - **Agent inbox first** — every agent across your spaces, blocked ones on top; status shown by glyph, colour, and word.
-- **Raw terminal panes** — exact scrollback via `pane.read`, auto-fit to any phone width, with a key row and a composer; agent panes take image attach + clipboard-image paste.
+- **Raw terminal panes** — exact scrollback via `pane.read`, auto-fit to any screen width, with a key row and a composer; agent panes take image attach + clipboard-image paste.
 - **Installable PWA + push** — add to home screen and get a Web Push when an agent blocks or finishes, even with the app closed.
 - **One binary, zero deps** — the UI is embedded; drop `herdrweb` on a machine and run it.
 - **Live & multiplexed** — one Herdr connection fanned to every browser over a thin WebSocket pass-through.
@@ -150,8 +150,9 @@ Desktop layout (≥ 880px) — the sidebar *is* the inbox:
 - **Pane** (`/pane/:id`) — the core screen, a full-screen push: a compact
   header (back · pane title · status · ⋯ pane actions; tapping the title opens
   a tab-switcher bottom sheet) over raw terminal scrollback via `pane.read`,
-  auto-fit to the viewport width (a box diagram keeps its columns on any
-  phone) and follow-on-new-output. Each pane gets a fresh scroller, starting at
+  auto-fit to the view's width at any screen size (a box diagram keeps its
+  columns; text shrinks to no less than 10px and grows back when the view
+  widens) and follow-on-new-output. Each pane gets a fresh scroller, starting at
   the bottom and left edge. The composer routes by pane kind — agent
   panes use `agent.prompt` + `agent.send_keys`, plain terminals use
   `pane.send_text` + `pane.send_keys` — above a 44px key row
