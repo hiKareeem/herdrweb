@@ -1,5 +1,11 @@
 # Log
 
+## 2026-09-28
+
+**Windows support + browser hardening.**
+
+Documented the Windows transport (Herdr's named pipe behind `herdr.ConfigDir()`/`Listen`), the `-session` and `-allow-host` flags, the Task Scheduler `-service` backend, and the bridge's new `hostGuard` (Host/Origin checks) plus the `browserMethods` allowlist on the `/ws` pass-through.
+
 ## 2026-09-03
 
 **Initial bundle.**
