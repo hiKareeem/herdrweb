@@ -1,7 +1,7 @@
 ---
 type: Go Package
 title: internal/server
-description: Hub — owns one Herdr connection, caches a normalized snapshot, fans it to browsers over WebSocket, and serves REST endpoints
+description: Hub — subscribes to Herdr events, caches a normalized snapshot, fans it to browsers over WebSocket, and serves REST endpoints
 tags: [hub, websocket, broadcast, http]
 timestamp: 2026-09-03T00:00:00Z
 ---

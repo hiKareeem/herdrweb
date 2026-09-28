@@ -26,7 +26,8 @@ Herdr Web: one Go binary (`herdrweb`) that embeds a SvelteKit SPA and bridges th
 - **The browser↔bridge WebSocket is a thin pass-through**, restricted to `browserMethods` in `internal/server/server.go` (a twin of the web `Call` union - add a UI call to both or it fails "not available"), so params must match Herdr exactly:
   - `pane.read` → `{ pane_id, source: 'recent_unwrapped', lines }`; the reply is `result.read.text` (a string), not `lines`.
   - `agent.send_keys` → `keys` is a **string array** (e.g. `['esc']`), tokens `up/down/left/right/tab/shift+tab/enter/esc/ctrl+c/ctrl+d` (Herdr accepts any key-combo string: printable keys, `enter`/`esc`, `ctrl+`/`alt+`/`shift+` chords, `f1`…).
-  - `agent.prompt` → `wait.until` is an array; don't block the UI on its (long) resolution.
+  - `agent.prompt` → send it without `wait`; nothing reads the result.
+- **Herdr serves one request per connection**, then closes it. `herdr.Client.Call` dials per call; never share a connection between calls, or a call Herdr holds open stalls every call queued behind it.
 - **Live agent panes are raw terminal only** — there is no chat/transcript view or chat/raw toggle. Don't reintroduce a transcript parser.
 
 ## Conventions & gotchas

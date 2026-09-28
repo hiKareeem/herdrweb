@@ -35,3 +35,7 @@ On `/pane/*` the desktop sidebar can be hidden so the terminal gets the full wid
 **Terminal fits its view at every width.**
 
 `fitToWidth` applied only below the 880px breakpoint, so an iPad in landscape showed a 152-column pane a few columns short even with the sidebar hidden. It now fits at every width and measures the text with a `Range` instead of `scrollWidth`, which stayed at the box width once fitted and so kept the font shrunk after the view widened. Updated `concepts/terminal-view.md`.
+
+**One Herdr connection per call; prompts without `wait`.**
+
+After a prompt was sent from the web UI, the pane stopped updating and its status stayed stale until the agent finished. The bridge multiplexed every call over one persistent Herdr connection, but Herdr answers one request per connection and then closes it: measured, a second request after the first reply finds the pipe closing, and requests written while one is in progress wait behind it and then fail with EOF. The Composer's `agent.prompt` carried `wait: {until: [idle, blocked]}`, so each prompt held that connection until the agent went idle. `herdr.Client.Call` now dials per call, and the Composer sends prompts without `wait`, whose result nothing read. Removed `mux_test.go`; the server test fake now serves one request per connection. Updated `packages/herdr.md`, `packages/server.md`, `packages/index.md`, `architecture/overview.md`, `architecture/data-flow.md` and `frontend/composer.md`.
