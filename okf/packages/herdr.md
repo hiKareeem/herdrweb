@@ -1,7 +1,7 @@
 ---
 type: Go Package
 title: internal/herdr
-description: Client for the Herdr local socket — persistent id-multiplexed JSON-RPC plus a streaming event subscription
+description: Client for the Herdr local socket — JSON-RPC on one connection per call, plus a streaming event subscription
 tags: [ipc, socket, json-rpc, client]
 timestamp: 2026-09-03T00:00:00Z
 ---
@@ -15,7 +15,7 @@ Speaks Herdr's local-socket protocol: newline-delimited JSON, id-correlated requ
 | Symbol | Purpose |
 |---|---|
 | `New(socketPath)` | construct (empty path → `DefaultSocketPath`) |
-| `Call(ctx, method, params) (json.RawMessage, error)` | one RPC over the persistent connection |
+| `Call(ctx, method, params) (json.RawMessage, error)` | one RPC on its own connection |
 | `Snapshot(ctx, out)` | `session.snapshot`, unwrapping the `{snapshot:…}` envelope; rides `Call` |
 | `Subscribe(ctx, types, onEvent)` | long-lived events connection; blocks until drop/ctx |
 | `ConfigDir()` | Herdr's per-user dir: `~/.config/herdr`, `%APPDATA%\herdr` on Windows |
@@ -23,16 +23,15 @@ Speaks Herdr's local-socket protocol: newline-delimited JSON, id-correlated requ
 | `Listen(path)` | serve a Herdr-style socket (Unix socket or named pipe); test fakes use it |
 | `AllEventTypes` | global resource events subscribed by default |
 
-# Persistent multiplexing
+# One connection per call
 
-Post `bridge-ipc-hardening`, `Call` no longer dials per request. The client keeps one connection guarded by `mu` with a `pending map[string]chan call`:
+Herdr answers exactly one request per connection and then closes it, as the CLI assumes. Measured against Herdr 0.9.1-preview on Windows: a second request written after the first reply finds the pipe closing, and requests written while one is in progress wait behind it and then fail with EOF.
 
-- `Call` registers a waiter under `id`, writes the request under `mu`, then `select`s on the waiter channel vs `ctx.Done()` (per-call timeout via ctx — a shared conn can't set per-call deadlines).
-- A single `readLoop` dispatches each reply to its waiter by `id`; unknown ids (already cancelled) are dropped.
-- On read/write error `dropConn` closes the connection, fails all outstanding waiters (`errClosed`), and bumps a generation counter; the next `Call` lazily reconnects.
-- `Subscribe` keeps its **own** connection (streaming, no id correlation).
+- `Call` dials, writes one request line, reads one reply line, and closes. `context.AfterFunc` closes the connection when `ctx` ends, which unblocks the read.
+- A call Herdr holds open (such as `agent.prompt` with a `wait`) therefore never delays other calls. Until 2026-09-28 the client multiplexed every call over one persistent connection (`bridge-ipc-hardening`); behind a prompt's wait, each `pane.read` and snapshot stalled until the agent went idle, and concurrent calls failed with EOF.
+- `Subscribe` keeps its **own** long-lived connection (streaming, no id correlation).
 
-Concurrency is exercised by `internal/herdr/mux_test.go` (correlation, out-of-order, ctx-cancel, reconnect).
+`TestSlowCallDoesNotStallOthers` in `internal/herdr/client_test.go` runs against a one-request-per-connection fake.
 
 # Citations
 

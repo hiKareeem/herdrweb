@@ -23,3 +23,7 @@ Documented the Windows transport (Herdr's named pipe behind `herdr.ConfigDir()`/
 **Browser hardening.**
 
 Documented the bridge's `hostGuard` (Host/Origin checks against DNS rebinding and cross-site WebSocket hijacking), the `-allow-host` flag, and the `browserMethods` allowlist on the `/ws` pass-through.
+
+**One Herdr connection per call; prompts without `wait`.**
+
+After a prompt was sent from the web UI, the pane stopped updating and its status stayed stale until the agent finished. The bridge multiplexed every call over one persistent Herdr connection, but Herdr answers one request per connection and then closes it: measured, a second request after the first reply finds the pipe closing, and requests written while one is in progress wait behind it and then fail with EOF. The Composer's `agent.prompt` carried `wait: {until: [idle, blocked]}`, so each prompt held that connection until the agent went idle. `herdr.Client.Call` now dials per call, and the Composer sends prompts without `wait`, whose result nothing read. Removed `mux_test.go`; the server test fake now serves one request per connection. Updated `packages/herdr.md`, `packages/server.md`, `packages/index.md`, `architecture/overview.md`, `architecture/data-flow.md` and `frontend/composer.md`.

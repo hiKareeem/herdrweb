@@ -36,13 +36,13 @@ browser (SvelteKit)  ⇄  Go bridge (herdrweb)  ⇄  Herdr socket
 - **Raw terminal panes** — exact scrollback via `pane.read`, auto-fit to any phone width, with a key row and a composer; agent panes take image attach + clipboard-image paste.
 - **Installable PWA + push** — add to home screen and get a Web Push when an agent blocks or finishes, even with the app closed.
 - **One binary, zero deps** — the UI is embedded; drop `herdrweb` on a machine and run it.
-- **Live & multiplexed** — one Herdr connection fanned to every browser over a thin WebSocket pass-through.
+- **Live** — one Herdr event subscription fanned to every browser over a thin WebSocket pass-through.
 
 ## Why not SSH, or [`herdr-web`](https://github.com/kcosr/herdr-web)?
 
 **This app is good for:** the 95% of agent-babysitting that's actually just text — reading
 scrollback, answering "yes/no", nudging it with a prompt. It's not a toy or a demo: one Go
-binary, one persistent connection to the Herdr socket, real RPCs (`pane.read`, `agent.prompt`,
+binary, one live subscription to the Herdr socket, real RPCs (`pane.read`, `agent.prompt`,
 `agent.send_keys`) straight over a WebSocket — no screen-scraping, no terminal emulator pretending
 to be a web page. Stable enough that it's my only interface to Herdr, daily, from my phone.
 
@@ -263,9 +263,9 @@ the socket traffic so the UI has live data during development.
 ```
 cmd/herdr-bridge/       # main: serves UI + /ws + /api, proxies the Herdr socket
 internal/protocol/      # canonical Go types + Herdr snapshot -> UI normalization
-internal/herdr/         # Herdr socket client (framing, snapshot, event subscribe, reconnect)
+internal/herdr/         # Herdr socket client (one connection per call, snapshot, event subscribe)
 internal/config/        # config.toml [web] read/write
-internal/server/        # hub: one Herdr connection, WS fan-out, periodic re-snapshot
+internal/server/        # hub: Herdr event subscription, WS fan-out, periodic re-snapshot
 internal/webui/         # go:embed of the built SvelteKit assets
 web/                    # SvelteKit + TypeScript front end
 docs/design/            # original design references (spec + HTML prototypes)
