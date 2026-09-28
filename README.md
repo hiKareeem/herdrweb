@@ -130,12 +130,16 @@ Desktop layout (≥ 880px) — the sidebar *is* the inbox:
   chip opens that space's chat pane. Status is carried by glyph shape, colour,
   and word — never colour alone. On phones a fixed **bottom tab bar**
   (Agents · Spaces · Settings, with a blocked-count badge) is the primary
-  navigation; on desktop (≥ 880px) the sidebar *is* the inbox.
+  navigation; on desktop (≥ 880px) the sidebar *is* the inbox. On a pane its
+  **hide** button gives the terminal the full width (remembered per browser);
+  **☰** in the pane header then shows the sidebar over the terminal, closing on
+  the next pick, and its **pin** docks it again.
 - **Pane** (`/pane/:id`) — the core screen, a full-screen push: a compact
   header (back · pane title · status · ⋯ pane actions; tapping the title opens
   a tab-switcher bottom sheet) over raw terminal scrollback via `pane.read`,
   auto-fit to the viewport width (a box diagram keeps its columns on any
-  phone) and follow-on-new-output. The composer routes by pane kind — agent
+  phone) and follow-on-new-output. Each pane gets a fresh scroller, starting at
+  the bottom and left edge. The composer routes by pane kind — agent
   panes use `agent.prompt` + `agent.send_keys`, plain terminals use
   `pane.send_text` + `pane.send_keys` — above a 44px key row
   (↑ ↓ ← → ⇥ ⇧⇥ ⏎ esc ⌃C ⌃D). On agent panes, typing `/` opens a

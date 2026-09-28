@@ -4,7 +4,7 @@
   import { afterNavigate } from '$app/navigation';
   import { session } from '$lib/session/live';
   import { width, BREAKPOINT } from '$lib/layout/responsive';
-  import { config } from '$lib/ui/state';
+  import { config, sidebarCollapsed, sidebarPeek } from '$lib/ui/state';
   import Sidebar from '$lib/screens/Sidebar.svelte';
   import BottomNav from '$lib/screens/BottomNav.svelte';
   import Toast from '$lib/ui/Toast.svelte';
@@ -21,6 +21,7 @@
   // scrollback (e.g. the pane view) owns its own pinning and is unaffected.
   afterNavigate(() => {
     if (contentEl) contentEl.scrollTop = 0;
+    sidebarPeek.set(false);
   });
   const s = session();
   const spaces = s.spaces;
@@ -31,6 +32,9 @@
   // Full-screen pushes: the pane (terminal + composer) and diff own the whole
   // height — the tab bar yields so the keyboard row and composer stay reachable.
   const fullscreen = $derived(path.startsWith('/pane/'));
+  // Collapse only ever applies to the pane: other routes are narrow menus that
+  // gain nothing from the width, and would be stranded without navigation.
+  const collapsed = $derived(desktop && fullscreen && $sidebarCollapsed);
 
   // Keep the OS/browser chrome colour in sync with the active theme - must
   // match each theme's `--app-bg` in lib/tokens.css and app.html's pre-paint
@@ -63,10 +67,10 @@
 
 <!-- --screen-h: see app.css. pt keeps headers below a translucent iOS status bar. -->
 <div
-  class="flex h-[calc(var(--screen-h)/var(--font-scale,1))] overflow-hidden pt-[calc(env(safe-area-inset-top)/var(--font-scale,1))]"
+  class="relative flex h-[calc(var(--screen-h)/var(--font-scale,1))] overflow-hidden pt-[calc(env(safe-area-inset-top)/var(--font-scale,1))]"
 >
-  {#if desktop}
-    <Sidebar spaces={$spaces} connection={$connection} />
+  {#if desktop && !collapsed}
+    <Sidebar spaces={$spaces} connection={$connection} control={fullscreen ? 'hide' : undefined} />
   {/if}
 
   <div class="flex h-full min-h-0 min-w-0 flex-1 flex-col">
@@ -82,6 +86,16 @@
       <BottomNav />
     {/if}
   </div>
+
+  <!-- Absolute inside the shell, not fixed: an installed iOS app lays fixed
+       elements out against a viewport shorter than the screen (see app.css). -->
+  {#if collapsed && $sidebarPeek}
+    <button class="absolute inset-0 z-40 bg-black/50" aria-label="close sidebar" onclick={() => sidebarPeek.set(false)}
+    ></button>
+    <div class="absolute bottom-0 left-0 z-50 top-[calc(env(safe-area-inset-top)/var(--font-scale,1))] shadow-2xl">
+      <Sidebar spaces={$spaces} connection={$connection} control="pin" />
+    </div>
+  {/if}
 </div>
 <Toast />
 <BottomSheet />
