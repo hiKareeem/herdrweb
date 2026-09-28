@@ -181,4 +181,23 @@ test.describe('desktop layout (>=880px)', () => {
     await expect(pre).not.toContainText('running vitest');
     await expect(pre).toHaveJSProperty('scrollLeft', 0);
   });
+
+  test('the terminal shrinks to fit a wide pane and grows back when the sidebar hides', async ({ page }) => {
+    await page.goto('/pane/w1%3Ap1' + q);
+    const pre = page.locator('pre.raw');
+    await expect(pre).toContainText('running vitest');
+    // 120 columns: too wide beside the sidebar at 14px, narrow enough to fit
+    // there above the 10px floor, and within the full width at 14px.
+    await pre.evaluate((el) => el.append('x'.repeat(120)));
+    await page.setViewportSize({ width: 1201, height: 900 }); // a resize refits
+    const fits = () => pre.evaluate((el) => el.scrollWidth <= el.clientWidth);
+    const fontPx = () => pre.evaluate((el) => parseFloat(getComputedStyle(el).fontSize));
+    await expect.poll(fits).toBe(true);
+    const docked = await fontPx();
+    expect(docked).toBeLessThan(14);
+
+    await page.getByRole('button', { name: 'hide sidebar' }).click();
+    await expect.poll(fontPx).toBe(14);
+    expect(await fits()).toBe(true);
+  });
 });
