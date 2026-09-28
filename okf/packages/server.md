@@ -23,7 +23,7 @@ Bootstrap snapshot → `Subscribe` to Herdr events (each `markDirty`) → 1.5s `
 
 # REST
 
-- `GET/PUT /api/config` — read/write the [web] settings; a write persists then calls `server.reload_config`.
+- `GET/PUT /api/config` — read/write the UI settings file (`herdrweb-settings.json`, see [internal/config](/packages/config.md)).
 - `GET /api/health` — `{ok, herdr:<state>, version, socket}`.
 
 `Handler(allowHosts)` wires `/ws`, `/api/*`, and `/` → [webui](/packages/webui.md), all behind `hostGuard` (`guard.go`): Host must be an IP literal, `localhost`, `*.ts.net` or an `-allow-host` name (DNS rebinding), and a present `Origin` must equal the Host or be loopback (cross-site WebSocket hijacking; loopback admits the Vite dev proxy). See the [HTTP service](/services/bridge-http.md).

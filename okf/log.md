@@ -23,3 +23,7 @@ Documented the Windows transport (Herdr's named pipe behind `herdr.ConfigDir()`/
 **Browser hardening.**
 
 Documented the bridge's `hostGuard` (Host/Origin checks against DNS rebinding and cross-site WebSocket hijacking), the `-allow-host` flag, and the `browserMethods` allowlist on the `/ws` pass-through.
+
+**UI settings move out of Herdr's config.toml.**
+
+Herdr now reports unknown tables in `config.toml` (`unknown config section [web]`), and the bridge's `server.reload_config` after every settings save surfaced that warning in the Herdr TUI. Settings now live in `herdrweb-settings.json` beside `config.toml`; `config.Migrate` moves an existing `[web]` table there at startup and deletes only its lines. `/api/config` no longer reloads Herdr. Updated `config/settings.md`, `packages/config.md`, `packages/server.md`, `packages/cmd-herdr-bridge.md`, `services/bridge-http.md`, `concepts/themes.md` and the indexes.
