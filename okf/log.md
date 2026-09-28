@@ -27,3 +27,7 @@ Documented the bridge's `hostGuard` (Host/Origin checks against DNS rebinding an
 **UI settings move out of Herdr's config.toml.**
 
 Herdr now reports unknown tables in `config.toml` (`unknown config section [web]`), and the bridge's `server.reload_config` after every settings save surfaced that warning in the Herdr TUI. Settings now live in `herdrweb-settings.json` beside `config.toml`; `config.Migrate` moves an existing `[web]` table there at startup and deletes only its lines. `/api/config` no longer reloads Herdr. Updated `config/settings.md`, `packages/config.md`, `packages/server.md`, `packages/cmd-herdr-bridge.md`, `services/bridge-http.md`, `concepts/themes.md` and the indexes.
+
+**Collapsible desktop sidebar; clean pane switches.**
+
+On `/pane/*` the desktop sidebar can be hidden so the terminal gets the full width (for tablets in landscape), shown over the pane from the header, and pinned back. Switching panes used to reuse the terminal scroller: the new pane kept the previous one's horizontal offset, and iOS Safari left tiles of the old pane's text painted beside the new text. The scroller is now keyed per pane, and lines are tagged with the pane they were read from. Updated `frontend/navigation.md` and `concepts/terminal-view.md`.
